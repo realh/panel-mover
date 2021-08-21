@@ -218,7 +218,7 @@ function fullscreen_changed() {
     }
 	if ((_current_monitor?.inFullscreen ?? true) && avoid_fullscreen) {
 		move_panel(unfullscreen_monitor);
-	} else {
+	} else if (avoid_fullscreen) {
 		move_panel(primary_monitor);
 	}
 }
