@@ -14,34 +14,34 @@ function init() {
 
 function buildPrefsWidget() {
     let settings = ExtensionUtils.getSettings();
-	let box = new Gtk.Box({
-		halign: Gtk.Align.CENTER,
-		orientation: Gtk.Orientation.VERTICAL,
-		'margin-top': 20,
-		'margin-bottom': 20,
-		'margin-start': 20,
-		'margin-end': 20,
-		spacing: 16
-	});
+    let grid = new Gtk.Grid({
+        'row-homogeneous': true,
+        'row-spacing': 16,
+        'column-spacing': 16,
+        halign: Gtk.Align.CENTER,
+        valign: Gtk.Align.CENTER,
+    });
 
-	box.append(buildSwitcher(settings, 'move-hot-corners', _('Move Hot Corners:')));
-	box.append(buildSwitcher(settings, 'avoid-fullscreen', _('Avoid Fullscreen Windows:')));
-	box.append(buildSwitcher(settings, 'manual-controls', _('Show Manual Controls:')));
+	addSwitchAndLabel(grid, 0, settings, 'move-hot-corners', _('Move Hot Corners:'));
+	addSwitchAndLabel(grid, 1, settings, 'avoid-fullscreen', _('Avoid Fullscreen Windows:'));
+	addSwitchAndLabel(grid, 2, settings, 'manual-controls', _('Show Manual Controls:'));
 
-	return box;
+	return grid;
 }
 
-function buildSwitcher(settings, key, labeltext) {
-	let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 10 });
+function addSwitchAndLabel(grid, row, settings, key, labeltext) {
+	let label = new Gtk.Label({
+        label: labeltext,
+        halign: Gtk.Align.START,
+        valign: Gtk.Align.BASELINE
+    });
 
-	let label = new Gtk.Label({label: labeltext });
-
-	let switcher = new Gtk.Switch();
-
+	let switcher = new Gtk.Switch({
+        halign: Gtk.Align.START,
+        valign: Gtk.Align.BASELINE
+    });
 	settings.bind(key, switcher, 'active', Gio.SettingsBindFlags.DEFAULT);
 
-	hbox.append(label);
-	hbox.append(switcher);
-
-	return hbox;
+	grid.attach(label, 0, row, 1, 1);
+	grid.attach(switcher, 1, row, 1, 1);
 }
