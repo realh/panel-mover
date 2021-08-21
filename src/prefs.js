@@ -25,6 +25,8 @@ function buildPrefsWidget() {
 	});
 
 	box.append(buildSwitcher(settings, 'move-hot-corners', _('Move Hot Corners:')));
+	box.append(buildSwitcher(settings, 'avoid-fullscreen', _('Avoid Fullscreen Windows:')));
+	box.append(buildSwitcher(settings, 'manual-controls', _('Show Manual Controls:')));
 
 	return box;
 }
