@@ -2,7 +2,7 @@
 GNOME Shell Extension. 
 
 Automatically moves the top panel to the secondary monitor if the primary is in
-fullscreen and/or allows it to be moved automatically.
+fullscreen and/or allows it to be moved manually.
 
 Based on 
 [Noobsai's fullscreen-avoider extension](https://extensions.gnome.org/extension/4362/fullscreen-avoider/)
