@@ -1,5 +1,5 @@
 <schemalist gettext-domain="gnome-shell-extensions">
-  <schema id="org.gnome.shell.extensions.fullscreen-avoider" path="/org/gnome/shell/extensions/fullscreen-avoider/">
+  <schema id="org.gnome.shell.extensions.panel-mover" path="/org/gnome/shell/extensions/panel-mover/">
     <key name="move-hot-corners" type="b">
       <default>true</default>
       <summary>Move Hot Corners</summary>
