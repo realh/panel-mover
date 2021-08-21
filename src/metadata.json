@@ -4,7 +4,7 @@
 	"name": "Panel Mover", 
  	"gettext-domain": "gnome-shell-extensions",
 	"settings-schema": "org.gnome.shell.extensions.panel-mover",
-	"description": "Moves the top panel between monitors manually or automatically to avoid fullscreen windows",
+	"description": "Moves the top panel between monitors",
 	"url": "https://github.com/realh/panel-mover", 
 	"version": 1,
 	"shell-version": ["40"]
