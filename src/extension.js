@@ -4,8 +4,8 @@ const Main = imports.ui.main;
 const LM = Main.layoutManager;
 const Layout = imports.ui.layout;
 const Display = global.display;
-const St = imports.St;
-const Meta = imports.Meta;
+const St = imports.gi.St;
+const Meta = imports.gi.Meta;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -26,6 +26,89 @@ function overlap_vert(m1, m2) {
 }
 */
 
+// pos and size are "x","width" or "y","height". This compares both extremities
+// of m1 against both extremities of m2 and returns the minimum of the 4
+// distances.
+function min_distance(m1, m2, pos, size) {
+    let a0 = m1[pos];
+    let a1 = m1[pos] + m1[size];
+    let b0 = m2[pos];
+    let b1 = m2[pos] + m2[size];
+    return Math.min(Math.abs(a0 - b0), Math.abs(a0 - b1),
+        Math.abs(a1 - b0), Math.abs(a1 - b1));
+}
+
+function manual_move(d) {
+    let others = Array.from(LM.monitors).filter(m =>
+            m.index != _current_monitor?.index);
+    // Only one other monitor, easy
+    if (others.length == 1) {
+        move_panel(others[0]);
+        return;
+    }
+    // Filter out monitors that aren't in the target direction
+    let cm = _current_monitor;
+    let cx = cm.x;
+    let cy = cm.y;
+    others = others.filter(m => {
+        switch (d) {
+            case "previous":
+                return m.x < cx;
+            case "next":
+                return m.x > cx;
+            case "up":
+                return m.y < cy;
+            case "down":
+                return m.y > cy;
+        }
+    });
+    if (others.length == 1) {
+        move_panel(others[0]);
+        return;
+    }
+    others.sort((m1, m2) => {
+        // Prefer monitors that don't have a fullscreen window
+        if (m1.inFullscreen && !m2.inFullscreen) {
+            return 1;
+        } else if (!m1.inFullscreen && m2.inFullscreen) {
+            return -1;
+        }
+        // Then sort by distance from current monitor in primary direction
+        let d1, d2;
+        switch (d) {
+            case "previous":
+            case "next":
+                d1 = min_distance(m1, cm, "x", "width");
+                d2 = min_distance(m2, cm, "x", "width");
+                break;
+            case "up":
+            case "down":
+                d1 = min_distance(m1, cm, "y", "height");
+                d2 = min_distance(m2, cm, "y", "height");
+                break;
+        }
+        let d = d2 - d1;
+        if (d) {
+            return d;
+        }
+        // Finally sort by distance from current monitor orthogonal to primary
+        switch (d) {
+            case "previous":
+            case "next":
+                d1 = min_distance(m1, cm, "y", "height");
+                d2 = min_distance(m2, cm, "y", "height");
+                break;
+            case "up":
+            case "down":
+                d1 = min_distance(m1, cm, "x", "width");
+                d2 = min_distance(m2, cm, "x", "width");
+                break;
+        }
+        return d2 - d1;
+    });
+    move_panel(others[0]);
+}
+
 function update_controls() {
     let show = true;
 	if (!_settings.get_boolean('manual-controls')) {
@@ -39,17 +122,17 @@ function update_controls() {
         }
     }
     let dirs = {
-        left: false,
-        right: false,
+        previous: false,
+        next: false,
         up: false,
         down: false
     };
     if (show) {
         for (const monitor of LM.monitors) {
             if (monitor.x < _current_monitor.x) {
-                dirs.left = true;
+                dirs.previous = true;
             } else if (monitor.x > _current_monitor.x) {
-                dirs.right = true;
+                dirs.next = true;
             }
             if (monitor.y < _current_monitor.y) {
                 dirs.up = true;
@@ -57,7 +140,7 @@ function update_controls() {
                 dirs.down = true;
             }
         }
-        if (!(dirs.left || dirs.right || dirs.up || dirs.down)) {
+        if (!(dirs.previous || dirs.next || dirs.up || dirs.down)) {
             show = false;
         }
     }
@@ -73,9 +156,12 @@ function update_controls() {
     }
     if (!_panel_box) {
         _panel_box = new St.BoxLayout();
-        main.panel._rightBox.insert_child_at_index(button, 0);
+        Main.panel._rightBox.insert_child_at_index(_panel_box, 0);
     }
     for (const d in dirs) {
+        if (!dirs[d]) {
+            continue;
+        }
         let icon = new St.Icon({
             style_class: "system-status-icon",
             icon_name: `go-${d}-symbolic`
@@ -87,15 +173,9 @@ function update_controls() {
             track_hover: true
         });
         button.set_child(icon);
-        /*
         button.connect("button-press-event", function() {
-            if (fixed) {
-                disable_fix();
-            } else {
-                enable_fix();
-            }
+            manual_move(d);
         });
-        */
         _panel_box.add_child(button);
     }
 }
@@ -144,7 +224,7 @@ function fullscreen_changed() {
 }
 
 function move_panel(monitor) {
-    if (_current_monitor === monitor) {
+    if (_current_monitor.x === monitor.x && _current_monitor.y === monitor.y) {
         return;
     }
     _current_monitor = monitor;
