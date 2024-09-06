@@ -1,13 +1,14 @@
 'use strict';
 
-const Main = imports.ui.main;
-const LM = Main.layoutManager;
-const Layout = imports.ui.layout;
-const Display = global.display;
-const St = imports.gi.St;
-const Meta = imports.gi.Meta;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import { HotCorner } from 'resource:///org/gnome/shell/ui/layout.js';
+import St from 'gi://St';
+import Meta from 'gi://Meta';
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
+const Display = global.display;
+
+const LM = Main.layoutManager;
 
 let monitor_manager;
 let _settings = null;
@@ -254,34 +255,45 @@ function move_hotcorners(monitor) {
 
 	let size = LM.panelBox.height;
 
-	let corner = new Layout.HotCorner(LM, monitor, monitor.x, monitor.y);
+	let corner = new HotCorner(LM, monitor, monitor.x, monitor.y);
 	corner.setBarrierSize(size);
 	LM.hotCorners.push(corner);
 
 	LM.emit('hot-corners-changed');
 }
 
-function enable() {
-	_settings = ExtensionUtils.getSettings();
-	_on_fullscreen = Display.connect('in-fullscreen-changed', fullscreen_changed);
-    update_controls();
-    _settings.connect("changed", function(settings, key) {
-        if (key == "avoid-fullscreen") {
-            fullscreen_changed();
-        } else if (key == "manual-controls") {
-            update_controls();
-        }
-    });
-    monitor_manager = Meta.MonitorManager.get();
-    _on_monitors = monitor_manager.connect("monitors-changed", update_controls);
+function get_monitor_manager() {
+    const context = Display.get_context();
+    const backend = context.get_backend();
+    return backend.get_monitor_manager();
 }
 
-function disable() {
-	monitor_manager.disconnect(_on_monitors);
-	Display.disconnect(_on_fullscreen);
-	_settings.run_dispose();
-}
+export default class PanelMoverExtension extends Extension {
+    constructor(metadata) {
+        super(metadata);
+        this.initTranslations();
+    }
 
-function init() {
-	ExtensionUtils.initTranslations();
+    enable() {
+        _settings = this.getSettings();
+        _on_fullscreen = Display.connect('in-fullscreen-changed',
+            fullscreen_changed);
+        update_controls();
+        _settings.connect("changed", function(settings, key) {
+            if (key == "avoid-fullscreen") {
+                fullscreen_changed();
+            } else if (key == "manual-controls") {
+                update_controls();
+            }
+        });
+        monitor_manager = get_monitor_manager();
+        _on_monitors = monitor_manager.connect("monitors-changed",
+            update_controls);
+    }
+
+    disable() {
+        monitor_manager.disconnect(_on_monitors);
+        Display.disconnect(_on_fullscreen);
+        _settings.run_dispose();
+    }
 }

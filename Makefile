@@ -1,5 +1,5 @@
 #=============================================================================
-UUID=panel-mover@realh.co.uk
+UUID=panel-mover@realh
 SRCDIR=src
 BUILDDIR=build
 EXTENSIONDIR=~/.local/share/gnome-shell/extensions

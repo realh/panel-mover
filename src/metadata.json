@@ -1,11 +1,11 @@
 {
 	"extension-id": "panel-mover",
-	"uuid": "panel-mover@realh.co.uk", 
+	"uuid": "panel-mover@realh", 
 	"name": "Panel Mover", 
  	"gettext-domain": "gnome-shell-extensions",
 	"settings-schema": "org.gnome.shell.extensions.panel-mover",
 	"description": "Moves the top panel between monitors",
 	"url": "https://github.com/realh/panel-mover", 
-	"version": 1,
-	"shell-version": ["40"]
+	"version": 2,
+	"shell-version": ["46"]
 }

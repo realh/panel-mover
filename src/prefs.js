@@ -1,19 +1,13 @@
 'use strict';
 
-const Gio = imports.gi.Gio;
-const Gtk = imports.gi.Gtk;
+import Gio from 'gi://Gio';
+import Gtk from 'gi://Gtk';
+import Adw from 'gi://Adw';
 
-const Gettext = imports.gettext.domain('gnome-shell-extensions');
-const _ = Gettext.gettext;
+import {ExtensionPreferences, gettext as _} from
+    'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-
-function init() {
-	ExtensionUtils.initTranslations();
-}
-
-function buildPrefsWidget() {
-    let settings = ExtensionUtils.getSettings();
+function buildPrefsWidget(settings) {
     let grid = new Gtk.Grid({
         'row-homogeneous': true,
         'row-spacing': 16,
@@ -44,4 +38,22 @@ function addSwitchAndLabel(grid, row, settings, key, labeltext) {
 
 	grid.attach(label, 0, row, 1, 1);
 	grid.attach(switcher, 1, row, 1, 1);
+}
+
+export default class PanelMoverExtensionPreferences extends ExtensionPreferences {
+    constructor(metadata) {
+        super(metadata);
+        this.initTranslations();
+    }
+
+    fillPreferencesWindow(window) {
+        window._settings = this.getSettings();
+        const page = new Adw.PreferencesPage();
+        const group = new Adw.PreferencesGroup({
+            title: _('Preferences'),
+        });
+        group.add(buildPrefsWidget(window._settings));
+        page.add(group);
+        window.add(page);
+    }
 }
