@@ -6,6 +6,6 @@
 	"settings-schema": "org.gnome.shell.extensions.panel-mover",
 	"description": "Moves the top panel between monitors",
 	"url": "https://github.com/realh/panel-mover", 
-	"version": 2,
-	"shell-version": ["46", "47"]
+	"version": 3,
+	"shell-version": ["46", "47", "48" ]
 }
